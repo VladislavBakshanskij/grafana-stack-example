@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+    <springProperty defaultValue="bio-payment-instrument" name="SpringAppName" scope="context"
+                    source="spring.application.name"/>
+    <springProperty defaultValue="8080" name="SpringAppPort" scope="context" source="server.port"/>
+    <property name="FILENAME" value="${SpringAppName}-${SpringAppPort}"/>
+
+    <appender class="ch.qos.logback.core.rolling.RollingFileAppender" name="FILE">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%15.15thread] [%mdc] | %5.5level %50.50logger | - %msg %ex{short} %n
+            </pattern>
+        </encoder>
+        <file>/var/log/${SpringAppName}/${FILENAME}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${SpringAppName}-%d{yyyy-MM-dd}-${SpringAppPort}.log</fileNamePattern>
+            <!-- 30 days to keep -->
+            <maxHistory>30</maxHistory>
+            <!-- total size of all archive files, if total size > 100GB, it will delete old archived file -->
+            <totalSizeCap>500MB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <appender class="ch.qos.logback.core.rolling.RollingFileAppender" name="JSON-FILE">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <pattern>
+                    <pattern>
+                        {
+                        "timestamp": "%d{yyyy-MM-dd'T'HH:mm:ss.SSS}",
+                        "level": "%level",
+                        "logger": "%logger",
+                        "thread": "%thread",
+                        "message": "%d{yyyy-MM-dd HH:mm:ss.SSS} [%15.15thread] [%mdc] | %5.5level %50.50logger | - %msg %ex{full}",
+                        "mdc": "%mdc"
+                        }
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+
+        <file>/var/log/${SpringAppName}/${FILENAME}.json.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${SpringAppName}-%d{yyyy-MM-dd}-${SpringAppPort}.json.log</fileNamePattern>
+            <!-- 30 days to keep -->
+            <maxHistory>30</maxHistory>
+            <!-- total size of all archive files, if total size > 100GB, it will delete old archived file -->
+            <totalSizeCap>500MB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+
+    <appender class="ch.qos.logback.core.ConsoleAppender" name="CMD">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%15.15thread] [%mdc] | %5.5level %50.50logger | - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <property name="FILENAME" value="${SpringAppName}-${SpringAppPort}"/>
+
+    <appender class="ch.qos.logback.core.rolling.RollingFileAppender" name="TRACING_FILE">
+        <encoder>
+            <pattern>%msg %ex{full} %n</pattern>
+        </encoder>
+        <file>/var/log/${SpringAppName}/${FILENAME}.tracing.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${SpringAppName}-%d{yyyy-MM-dd}-${SpringAppPort}.tracing.log</fileNamePattern>
+            <!-- 30 days to keep -->
+            <maxHistory>30</maxHistory>
+            <!-- total size of all archive files, if total size > 100GB, it will delete old archived file -->
+            <totalSizeCap>500MB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <logger name="my-logger" level="info" additivity="false">
+        <appender-ref ref="TRACING_FILE"/>
+    </logger>
+
+    <logger name="org.zalando.logbook" level="trace" additivity="false">
+        <appender-ref ref="CMD"/>
+    </logger>
+
+    <root level="info">
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="JSON-FILE"/>
+        <appender-ref ref="CMD"/>
+    </root>
+    <springProperty defaultValue="bio-payment-instrument" name="SpringAppName" scope="context"
+                    source="spring.application.name"/>
+
+    <springProperty defaultValue="8080" name="SpringAppPort" scope="context" source="server.port"/>
+</configuration>
+<!--00-30bfc4b4816d5bb214e54856fa6f61ba-7f32ddd5e2cc0d0c-01-->
+<!--00-6b39b59c59fa40b46fd83ab74a61dd94-616ac09af817c877-01-->
+        <!--<configuration>-->
+        <!--    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>-->
+        <!--    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>-->
+        <!--    <include resource="org/springframework/boot/logging/logback/file-appender.xml"/>-->
+
+        <!--    <springProperty scope="context" name="application" source="spring.application.name"/>-->
+
+        <!--&lt;!&ndash;    <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">&ndash;&gt;-->
+        <!--&lt;!&ndash;        <encoder class="ch.qos.logback.classic.encoder.JsonEncoder"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;    </appender>&ndash;&gt;-->
+
+        <!--        <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">-->
+        <!--            <http>-->
+        <!--                <url>http://localhost:3100/loki/api/v1/push</url>-->
+        <!--            </http>-->
+        <!--            <format>-->
+        <!--                <label>-->
+        <!--                    <pattern>app=${application},level=%level,host=${HOSTNAME},trace_id=%X{traceId:-NONE}</pattern>-->
+        <!--                </label>-->
+        <!--                <message>-->
+        <!--                    <pattern>%-5level [%.5(${HOSTNAME})] %applicationName[%15.15t] %.10thread [%mdc] %logger{20} | %msg %ex</pattern>-->
+        <!--                </message>-->
+        <!--                <sortByTime>true</sortByTime>-->
+        <!--            </format>-->
+        <!--        </appender>-->
+
+        <!--    <root level="debug">-->
+        <!--        <appender-ref ref="FILE"/>-->
+        <!--        <appender-ref ref="LOKI"/>-->
+        <!--        <appender-ref ref="CONSOLE"/>-->
+        <!--    </root>-->
+        <!--</configuration>-->

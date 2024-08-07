@@ -1,0 +1,24 @@
+receivers:
+  filelog:
+    include_file_path: false
+    include_file_name: false
+    include:
+      - /mnt/tracing/*/*.tracing.log
+
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: tempo:4317
+
+extensions:
+  health_check:
+
+service:
+  extensions: [health_check]
+  pipelines:
+    traces:
+      receivers: [filelog]
+      processors: [batch]
+      exporters: [otlp]

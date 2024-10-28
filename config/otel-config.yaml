@@ -1,24 +1,39 @@
 receivers:
-  filelog:
-    include_file_path: false
-    include_file_name: false
-    include:
-      - /mnt/tracing/*/*.tracing.log
+  otlp:
+    protocols:
+      grpc:
+      http:
 
 processors:
-  batch:
+  tail_sampling:
+    decision_wait: 10s
+    num_traces: 100
+    expected_new_traces_per_sec: 10
+    policies:
+      - name: error_policy
+        type: status_code
+        status_code:
+          status_codes: [ERROR]
+
+      - name: latency_policy
+        type: latency
+        latency:
+          threshold_ms: 500
+      - name: probabilistic-policy
+        type: probabilistic
+        probabilistic: { sampling_percentage: 0.25 }
 
 exporters:
+  debug:
+    verbosity: detailed
   otlp:
-    endpoint: tempo:4317
-
-extensions:
-  health_check:
+    endpoint: "tempo:4317"
+    tls:
+      insecure: true
 
 service:
-  extensions: [health_check]
   pipelines:
     traces:
-      receivers: [filelog]
-      processors: [batch]
-      exporters: [otlp]
+      receivers: [otlp]
+      processors: [tail_sampling]
+      exporters: [otlp, debug]

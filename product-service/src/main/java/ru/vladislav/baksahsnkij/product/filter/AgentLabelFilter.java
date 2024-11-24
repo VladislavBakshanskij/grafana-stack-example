@@ -8,6 +8,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import ru.vladislav.baksahsnkij.product.infra.ThrowingRunnable;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Component
+@ConditionalOnProperty(prefix = "pyroscrope.agent.tracing", name = "enabled")
 class AgentLabelFilter extends OncePerRequestFilter {
 
     private final Tracer tracer;
